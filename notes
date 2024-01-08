@@ -547,6 +547,63 @@ Installing Linux # chapter 9
 	1. GRUB Legacy (version 1) - Used by Debian,Red-Hat
 	2. GRUB 2 - The current versions of Ubuntu and RedHat
 
+      - Using GRUB Legacy (version 1)
+	How does your computer know which OS to start given multiple OS installed and several partitions set up? To select and manage which partition is booted and how it is booted, you need a bootloader. 
+    GRUB Legacy is GNU bootloader that offers:-	
+	* support for multiple executable formats
+	* support for multi-boot OS e.g Ubuntu,Fedora
+	* support for non-multi-boot OS e.g windows via chain-loading func. Chain-loading is the act of loading another bootloader(presumably one that is specific to the proprietary OS) from GRUB to start the selected OS).
+	* support for multiple filesystem types.
+	* support for automatic decompression of boot images.
+	* support for downloading boot images from a network
+
+      Booting with GRUB Legacy 
+       When you install Linux, you're typicalyy given the option to configure the info needed to boot your computer(with one or more OS) into the default bootloader.
+With GRUB bootloader in the Master Boot Record of your hard disk, when the BIOS starts up the bootloader one of several things can happen:
+  	* Default - If you do nothing, the default OS will boot auto..lly after 5 seconds timeout. (The timeout value (secs) is in grub.conf or menu.lst file)
+	* Select an OS - Press any key before the 5 secs expires and you see a list of titles to select from.
+	* Edit the boot process - Use `e` key to go to edit mode.
+
+     Temporarily changing boot options
+       The example of the GRUB Legacy editing screen identify the boot process for the OS you chose. 
+
+	root (hd0,0)
+	kernel /vmlinuz-2.6.32-131.17.1.el6.x86_64 ro root=/dev/mapper/vg_myhost-lv_root rd_NO_MD rd_NO_DM LANG=en_US.UTF-8
+	initrd /initramfs-2.6.32-131.17.1.el6.x86_64.img 
+
+     The 1st line (starts with `root`) shows that the entry for GRUB bootloader is on the first partition of the first hard disk (hd0,0). GRUB represents the hard disk as `hd`, regardless whether its a ISCI,or other type of disk. In GRUB Legacy, you just count the drive number and partition number starting from zero (0)
+     The 2nd line (starts with `kernel`) identifies:-
+	* the kernel boot image (/vmlinuz-2.6.32-131.17.1.el6.x86_64) and several options.
+	* `ro` option - This identifies the partition as initially being loaded as read-only and the location of the root filesystem on a partition with the label that begins (root=/dev/mapper/vg_myhost-lv_root) 
+
+      The 3rd line (starts with `initd`) identifies the location of the initial RAM disk which contains additional modules and tools needed during the boot process.
+
+    Here are some of the few options you can provide:-
+     - Boot to a shell - If your forgot your root password or if your boot process hangs, you can boot directly to a shell by adding `init=/bin/sh` to the boot line.
+     - Select a run level - You can add the run level you want to the end of the kernel line e.g to have the system boot to runlevel 3(multi-user plus networking) add 3 to the end of the kernel line.
+     - Watch boot messages - By default, you will see a splash screen as Linux boots. If you want to see messages showing activities happening as the system boots up, you can remove the option `rhgb quiet` from the kernel line. Pressing `ESC` during boot-up get the same result 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
