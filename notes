@@ -84,7 +84,7 @@ syntax
 find [options] -exec|-ok command {} \; - The {} act as a placeholder for the output i.e files found.
 e.g find . -type f -exec echo "I found {} " \;
 
-Managing Processes # chapter 6
+MANAGING PROCESSES # CHAPTER 6
 
 - ps - Is used to show the current running processes.
 - Run `ps u` to see the following output.
@@ -162,7 +162,7 @@ Eg # renice -n -5 PID
 
 
 
-Writing Simple Shell Scripts. # chapter 7
+WRITING SIMPLE SHELL SCRIPTS. # CHAPTER 7
 A shell script is simply a file with a bunch of shell commands.
 
 - To execute a shell, you can:-
@@ -342,7 +342,7 @@ $ grep /home /etc/passwd | cut -d':' -f6 -
     $ cat somefile.txt | sed 's/Mac/Linux/g' > output.txt
 
 
-Becoming a Linux System Administrator # chapter 8
+BECOMING A LINUX SYSTEM ADMINISTRATOR # CHAPTER 8
    To login as a root and also change the working env't to root, run
      $ su -  ## If you ignore -, the env't won't change.
    
@@ -532,7 +532,7 @@ ipheth                 16384  0
 
 
 
-Installing Linux # chapter 9
+INSTALLING LINUX # CHAPTER 9
     Installing from a live CD or USB drive
 	Here you are just copying the kernel, apps and settings from USB to hard disk.
     Understanding different parition types.
@@ -584,18 +584,22 @@ With GRUB bootloader in the Master Boot Record of your hard disk, when the BIOS 
      - Select a run level - You can add the run level you want to the end of the kernel line e.g to have the system boot to runlevel 3(multi-user plus networking) add 3 to the end of the kernel line.
      - Watch boot messages - By default, you will see a splash screen as Linux boots. If you want to see messages showing activities happening as the system boots up, you can remove the option `rhgb quiet` from the kernel line. Pressing `ESC` during boot-up get the same result 
 
+     Permanently Changing boot options    
+	NOTE: Grub config file is created when you install Linux
+	You can change the options that take effect each time you boot your comuter by changing GRUB config file. It's normally found in /boot/grub/grub.conf but for Ubuntu its in /etc/default/grub file. 
+	GRUB 2 the config file is now named (/boot/grub/grub.cfg). Here are some facts about grub.cfg file
+	* Its generated auto..lly from the contents of the /etc/default/grub file and the /etc/default/grub.d dir.
+	* grub.cfg file con contain scripting syntax e.g var(s), loops, funcs..
+	* Device names needed to identify the location of the kernels and initial RAM disks can be more reliably identified using lables or UUIDs 
+    Comments in the grub.cfg file indicate where the content came from. For example info generated from the /etc/grub.d/00_header file comes right after this comment line:- 
+
+	### BEGIN /etc/grub.d/00_header ###
 
 
+	To learn more about grub2, type `info grub2`
 
 
-
-
-
-
-
-
-
-
+GETTING AND MANGING SOFTWARE # CHAPTER 10
 
 
 
