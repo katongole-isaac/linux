@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# checking if the file exists
+
+read -p "Enter file name: " FILENAME;
+
+if [ -a $FILENAME ] ; then 
+  echo "File '$FILENAME' exists";
+else 
+  echo "No such file...";
+fi

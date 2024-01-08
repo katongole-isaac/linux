@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Arithmetic with let built-in 
+PI=4
+
+let answer=$PI/3
+
+echo "The value for answer is $answer"; 
+
+
+# Arithmetic with expr
+ echo "Answer of 2 + 2 is `expr 2 + 2 ` " ;
+
+
+# Arithmetic with bc
+
+echo "bc command 2 + 2: `echo 2+2 | bc` " 
+
+# Random number generation 
+
+# arithmetic expansion - $(())
+
+random_number=$(($RANDOM%100)) # This will generates integers within 0-100 range.
+echo "Random Number: $random_number" ;

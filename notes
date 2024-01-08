@@ -1,0 +1,571 @@
+[Linux Bible Notes Summary]
+
+Bash Configuration files.
+
+/etc/profile - Sets up user env't info for @ user. And its run when the user first log in. All the shell settings are gathered in /etc/profile.d directory.
+
+/etc/bashrc - Executes for @ user who runs the bash shell. values can be overridden by info in @ user's ~/.bashrc file
+
+~/.bashrc - Contains info that is specific to ur bash shell. Read when u log in or each time u open a new bash shell.
+
+Working with files
+
+- Brace Expansion Characters
+  Using {} u can expand out a set of char(s) across filenames,dirnames, etc.
+  Example: $ touch {a..f}{1..5} - This creates files with names like a1-a5,b1-b5, etc
+
+Understanding Files Permissions and Ownership
+
+Permission bits are set for file or directories. forexample -rwxrwxr-x
+
+For a:-
+
+- Regular file - a dash (-)
+- Symbolic Link - l
+- Directory - d
+- Block device - b
+- Character device - c
+- Socket - s
+- Pipe - p
+
+Changing Permissions with Chmod (numbers)
+
+Each Permission is assigned a number. Here are as follows:-
+Read (r) - 4
+Write (w) - 2
+Execute (x) - 1
+
+So use a total numbber to establish the permission of a file or dir.
+E.g set 7 means ( 4 + 2 + 1)
+set 0 means no permission.
+
+chmod 744 my_file - means 7 belongs to user, 4 for group and the last for others.
+
+Changind Permissions with chmod (letters)
+You can use + and - signs to add or remove permissions on a file or dir(s).
+
+E.g chmod a+w file. - Adding a write permission to all (a)
+
+o - means others
+a - means all
+u - means user
+g - means group
+
+Forexample chmod ug+rw script
+
+Searching Files with find
+
+Finding by name, size, etc.
+
+- By name - find /start -iname search_term
+- By size - find /.. -size +|-size e.g -size -1M = means files lessthan 1MB
+  E.g find /etc -size +10M means files greaterthan 10MBs.
+
+- By type - find / -type f|d
+- By user or group - find / -user $USER and find / -group myGroup
+
+- By Permission - find / -perm numbers|letters
+
+  - Hyphen (-) infront of a number means that all the 3 bits must match.
+  - Plus (+) infront of a number means any number can match for a search.
+
+  E.g find / -perm -755 - means that exact permission 7 for user, 5 for group and 5 for others.
+
+- By time
+
+  - By days ( atime, mtime, and ctime )
+  - By minutes ( mmin, amin, and cmin )
+
+- OR using not , or , and - These work as boolean operators.
+  e.g find / -user $USER -not -user root
+
+Finding files and executing commands.
+syntax
+find [options] -exec|-ok command {} \; - The {} act as a placeholder for the output i.e files found.
+e.g find . -type f -exec echo "I found {} " \;
+
+Managing Processes # chapter 6
+
+- ps - Is used to show the current running processes.
+- Run `ps u` to see the following output.
+
+USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND
+isaac 3555 0.0 0.1 14712 8956 pts/0 Ss 10:19 0:00 bash
+isaac 7887 0.0 0.0 11500 3280 pts/0 R+ 10:31 0:00 ps u
+
+- %CPU & %MEM - Show the %s of processor and RAM that the process is consuming.
+- VSZ (Virtual Set Size) - Is the amount of memory allocated for the process. This shows the size of the image process (in kilobytes).
+- RSS (Resident Set Size) - Is the amount of memory that is actually being used. Shows the size of the program in memory.
+- START - Shows the time the process began running.
+- TIME - Shows the cumulative system time used ( 0:00 means that a process hasn't used a whole second of CPU time.)
+- STAT - Shows the state of the process.
+
+To see all the processes running for the current user.
+
+- ps ux
+  To see all the processes running for all the users on the system.
+- ps aux
+  You can display selective column by specifying -o option e.g
+- ps -eo 'user,uid,comm,group,rss,vss' --sort=-rss - To sort use --sort=column
+
+Managing Background and Foreground Processes.
+
+- To add a program in the background and (&) at the end of it.
+  e.g find /usr > /tmp/allusrfiles &
+
+- To see the jobs in the background
+  $ jobs
+
+  [1]+ Stopped vi notes
+
+  The + means is the most recently added job in the bg.
+  The - means it was placed in the bg just before the most recent job.
+
+- To bring a job to foreground :-
+  e.g $fg %job_number such as $fg %4 - this brings a job with job_number 4
+  OR $fg % - refer to most recent command put into bg.
+  $ fg %[?]string - Refer to a job where the command contains a string.
+  $ fg %-- Refers to the previous job stopped before the one most recently stopped
+
+- To run a job in the bg again that was stopped.
+  Run $ bg %job_number - This restart this job.
+
+Killing and Renicing Processes.
+
+- Check out signals for more info:- man 7 signal
+- To signal processes by PID ; use kill
+  E.g kill -15 PID
+  kill -SIGKILL PID
+- You can use SIGHUP (1) to tell a process to re-read its config files.
+  E.g kill -1 PID
+
+- To kill processes by thier names instead of pid. use `killall`
+  NOTE: This kill all processes with the name you provide.
+  E.g killall -9 command - kills all the processes with command name.
+
+Setting Processor priority with nice and renice
+
+- Every process running on a system has a nice value btw -20 and 19. Default 0.
+- The lower the nice value, the more access to the CPUs the process will have. In other words, the nicer the process is, the less CPU attention it gets.
+- A regular user can only set nice values from 0 to 19.
+- A regular user can only set nice value higher, not lower. There will be can error if the user already set a nice value of a process let say 10 but want to change to 5.
+
+- Use the `nice` command to run a command with a particular nice value. Once a process is running, you can change the nice value using the `renice` command along with the process ID
+  E.g # nice +5 command &
+  You can verify that the nice value is properly set by using `top` command. Look in the command named `NI`
+
+  PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND  
+   3039 isaac 20 0 4289056 225716 83356 S 2.7 2.8 4:59.87 gnome-shell
+
+To change the nice value.
+Eg # renice -n -5 PID
+
+
+
+Writing Simple Shell Scripts. # chapter 7
+A shell script is simply a file with a bunch of shell commands.
+
+- To execute a shell, you can:-
+  - Use a filename as an arg to shell i.e `bash myscript`.
+  - Use a shebang in the top of the script i.e #!/path/your/intepreter
+
+Understanding Shell variables
+
+- To declare a variable:-
+  NAME=value
+  NOTE: Make sure the variable name and the value touch the equal(=) sign.
+
+- The output of a command can be stored in a variable forexample:-
+  today=$(date) or today=`date` - The output of date command is stored in variable `today`
+  You can use $(), or `` syntax
+
+Escaping Special Shell Characters.
+Keep in mind that char(s) e.g $, `, \* , !, etc, have special meaning to the shell.
+If you want to use them, you can escape them using a backslach(\) e.g echo \*
+
+    Also on using single and double quotes:-
+       * single quotes - Special char(s) are not intepreted. forexample
+      echo '$HOME `date`'; - it outputs '$HOME `date`'
+       * Double quotes - Special char(s) are intepreted. forexample
+      echo "$HOME `date`"; - it outputs the path to your home dir as well as current date.
+
+    To use variables, precede the variable name with dollar sign ($).
+      E.g machine=`uname -m`; echo $macine;
+
+Special Shell positional params. - Command line args are assigned $0, $1, $2, ..., $n; where:-
+_ $0 - refers to the name of the command.
+_ $1 - refers to the first command-line arg, and so on.
+_ $# - tells you how many parameters your script was given.
+_ $@ - holds all the args entered on command line. \* $? - recieves the exit status of the last command executed. Zero means success otherwise error.
+E.g echo "Command: $0, first: $1";
+
+Reading in Parameters
+Use the `read` command to read user input and assign them to variables forexample.
+#!/bin/bash
+read -p "Enter your age: " age;
+echo "You age is: $age yrs old";
+
+Parameter expansion in bash
+To use a variable value, we do $variable, this is realluy a short-hand of ${variable}.
+Bash has special rules that allow you to expand the value of a variable in various ways. E.g
+${var:-value} - If var is unset or empty, expand this to value.
+${var#pattern} - Chop the shortest match for pattern from the front of var's value.
+${var##pattern} - Chop the longest match
+${var%pattern} - Chop the shortest match from end of var's value.
+${var%%pattern} - Chop the longest match
+
+  Arrays in bash shell scripting 
+    - To declare an array \* space the array items with spaces
+        ARRAYNAME=('item1' 'item2' ...); - To get the length of the array
+  	${#ARRAYNAME[@]} 
+    - To get items of the array, use index 
+ 	- ${ARRAYNAME[0]} 
+	- ${ARRAYNAME[@]} # all array items 
+    - To add elements to array
+	array+=('elem');
+
+Performing arithmetic in Shell scripts.
+Bash uses untyped variables i.e they're treated as strings.
+Integer arithmetic can be performed using built-in `let` command or `expr` or `bc` commands.
+
+    Syntax
+     1. let
+    let variable=expression e.g expression - 2+3
+     2. expr
+      expr $NumTwo / 2
+     3. bc
+      echo "$NumOne / 0.3" | bc
+
+Using Programming constructs in shell scripts. - If..then example syntax
+_ the test is placed between [].
+_ When a test expression is evaluated, it returns either a 0 for true and 1 for false. \* use `help test` to see more test conditions.
+
+    variable=1
+    if [ $variable -eq 1 ] ; then
+    # some stmts here
+    fi
+    # You can use (=) when comparing strings otherwise use -eq for numbers.
+
+- if...then..elif..else
+  if [ variable = "someString" ] ; then
+
+
+    # stmts
+     elif [ anotherTest = "someOtherString" ]; then
+    # stmts
+     else
+    # stmts
+     fi
+
+    - Case command
+    This is similar to a switch stmt in C.
+
+    case "VAR" in
+      Result)
+       { body } ;;
+      Result1)
+       { body } ;;
+      *) 	# This is like the default in C
+       { body} ;;
+
+esac
+
+- Loops
+  - for...do loop
+
+
+    * Each element in the LIST is separated by whitespace.
+    for VAR in LIST # u can use c syntax e.g for((i=1; i<=LIMIT; i++)) ; do
+    do
+       { body }
+    done
+
+    forexample
+      for FILE in `ls`
+      do
+        echo $FILE
+      done
+
+      - while...do
+      * Executes while the condition is true
+      while condition
+      do
+        { body }
+      done
+
+      - until...do
+      * Executes until the condition is true , in other words, while the condition is false
+     until condition
+     do
+       { body }
+     done
+
+Trying some useful text manipulation programs.
+
+- Some of the most common useful programs you’ll see used are grep, cut, tr, awk, and sed.
+
+* The name general regular expression parser (grep) sounds intimidating, but grep is just a way to find patterns in files or text.
+  e.g grep regexp ; forexample grep ^St
+
+* Remove sections of line of text (cut)
+  The cut command can extract fields from a line of text or from files. It is very useful for parsing system configuration files into easy-to-digest chunks. You can specify the field separator you want to use and the fields you want, or you can break up a line based on bytes
+  forexample
+
+The following example lists all home directories of users on your system. This grep command line pipes a list of regular users from the /etc/passwd file and then displays the sixth field (-f6) as delimited by a colon (-d':'). The hyphen at the end tells cut to read from standard input (from the pipe).
+
+$ grep /home /etc/passwd | cut -d':' -f6 -
+
+- Translate or delete characters (tr)
+  The `tr` command is a char-based translator that can be used to replace one or set of char(s) with another or to remove a char from a line of text.
+  Forexample
+  The following translates all uppercase letters to lowercase letters.
+  $ WORD="Mixed UpPEr aNd LoWeR cAsE"
+  $ echo $WORD | tr [A-Z] [a-z] # mixed upper and lower case
+
+  The following shows how to rename files with any tabs or spaces translated into underscores.
+  #!/bin/bash
+  for file in \*; do
+  f=`echo $file | tr [:blank:] [_]`
+  [ "$file" = "$f" ] || mv -i -- "$file" "$f"
+  done
+
+- The stream editor (sed)
+  Sed command is a simple scriptable editor and can perform simple edits e.g remove lines with certain pattern, replacing one pattern with another .... Forexample
+
+
+    # search for '/hone/p' in /etc/passwd
+    $ sed -n '/home/p' /etc/passwd
+
+    # search for word Mac and replace it with `Linux`
+    $ sed 's/Mac/Linux/g' somefile.txt > output.txt
+    OR
+    $ cat somefile.txt | sed 's/Mac/Linux/g' > output.txt
+
+
+Becoming a Linux System Administrator # chapter 8
+   To login as a root and also change the working env't to root, run
+     $ su -  ## If you ignore -, the env't won't change.
+   
+   To login as a regular user i.e isaac 
+     $ su - isaac
+
+
+  Gaining admin access with sudo
+    The sudoers facility is the most common way to provide such privilege.
+    With sudoers facility, giving full or limited root privileges to any user simply entails adding the user to `/etc/sudoers`.
+   
+
+  Exploring Administrative Commands, Configuration Files and Log files
+   
+  Administrative Commands
+   when u log as a root, yor $PATH variable is set to include some dir(s) that contain commands for root user. These include:-
+   - /sbin - Contains commands needed to boot the system including commands for checking fs (fsck) , start/stop system services (service).
+   - /usr/bin - Contains commands for such things as managing user acc(s) e.g useradd & checking processes that are holding files open e.g `lsof`. Commands that run as daemon ( a daemon process is a process that runs in a background waiting for service requests e.g processes ending with a `d` e.g sshd, cupsd).
+
+
+  Administrative Configuration files
+   - The two major locations of config files are:-
+	* Home directory - where your personal config files are kept
+	* /etc - which holds the system-wide config files.
+  Following are descriptions of dir(s) & subdir(s) that contain useful config files.
+    - $HOME -  Many config files are directly in each user's home dir and begin with dot (.)
+    - /etc/ - Contains most of the basic linux system config files.
+	- /etc/cron* - Directories in this set contain files that define how the `crond` utility runs apps on a:-
+	* daily (cron.daily)
+	* hourly (cron.hourly)
+	* monthly (cron.monthly)
+	* weekly (cron.weekly) schedule
+
+	- /etc/cups - Contain files used to configure CUPS printing service.
+	- /etc/default - Contain files that set default values for various utilities. e.g file for useradd command defines default group number, home dir , passwd expiry date. shell, skeleton dir (/etc/skel) that are used when creating a new user account.
+	- /etc/httpd - Contains a variety of files used to configure the behavior of Apache web server ( specifically httpd daemon process). It can also be found in /etc/apache[2])
+	- /etc/init.d - Contains permanent copies of System V-style run-level scripts. These scripts are often linked from the `/etc/rc?.d` directories to have each service associated with a script started or stopped for a given run-level. The ? is replaced by the run-level number (0 - 6)
+	- /etc/mail - contain files used to configure sendmail mail transport agent.
+	- /etc/pcmcia - Contains config files that allow you to have a variety of PCMCIA cards on your computer. (PCMCIA slots are those openings on your laptop that enable you to have credit-card–sized cards attached to your computer.
+	- /etc/postfix - Contains config files for postfix mail transport agent.
+	- /etc/ppp - Contains several config files used to set up Point-to-Point (PPP) so that you can have your computer dial out to the Internet.(PPP is a Layer 2 protocol)
+	- /etc/rd?.d - There is a seperate rc?.d dir for each valid system state:-
+		DIR 	STATE
+		rc0.d	shutdown
+		rc1.d	single-user 
+		rc2.d	multiuser
+		rc3.d 	multiuser plus networking
+		rc4.d	user-defined
+		rc5.d	mutliuser,networking,plus GUI login state
+		rc6.d 	reboot
+	- /etc/security - Contains files that set a variety of default security conditions for your computer, basically defining how authentication is done.
+	- /etc/skel - Any files contained in this dir are auto..lly copied to a user's home dir when that user is added to the sys. By default, most of them are dot(.) files.
+	- /etc/sysconfig - Contains important sys config files that are created and maintained by various services(including `iptables`, `samba` and most network servies). Commonly used in Red-Hat distos.
+	- /etc/xinetd.d - Contains a set of files each of which defines an on-demand network service that the `xinetd` daemon listens for on a given port. When the `xinetd` daemon process recievesa request for a service, it uses the info in these files to determine which daemon processes to start ot handle the request.
+	
+  The following are some interesting config files in /etc/
+   - aliases - Can contain distro lists used by the linux mail service. ( maybe located in /etc/mail)
+   - bashrc - Sets sys-wide defaults for bash shell users.
+   - crontab - Set times for running automated tasks and variables associated with the `cron` facility (e.g SHELL & PATH associated with `cron`)
+   - exports - Contains a list of local dir(s) that are available to be shared by remote computers using the Network File System (NFS)
+   - fstab - Identifies the devices for storage media (e.g harddisk, floppy...) and locations where they are mounted in the linux sys. This is used by the `mount` command to choose which file sys to mount when the sys first boots.
+   - group - Identifies group names and group ID (GIDs) that are defined on the sys. 
+   - gshadow - Contains shadow passwds for groups.
+   - host.conf - Used to set the locations in which domain names (e.g x.com) are search for an TCP/IP networks (e.g internet). By default the local `hosts` file is searched and then any name server entries in `resolv.conf`
+   - hosts - Contains IP addresses and host names that you can reach from your comp. (Usually this file is used just to store names of computers on your LAN or private network)
+   - hosts.allow - Lists host computers that are allowed to use certain TCP/IP services from the local computer. 
+   - hosts.deny - Lists host computers that are not allowed to use certain TCP/IP services from the local computer.
+   - inittab - Contains info that defines which programs start and stop when linux boots, shuts down, or goes into different states in between. This config file is the first one read when linux start the init process.
+   - mtab - Contains a list of file systems that are currently mounted.
+   - mtools.conf - Contains settings used by DOS tools in linux.
+   - named.conf - Contains DNS settings if you're running your own DNS server.
+   - nsswitch.conf - Contains name service switch settings, for identifying where critical sys info(user accs, host name-to-address mappings,...) comes from (local host or via network services)
+   - ntp.conf - Includes info needed to run the Network Time Protocol (NTP)
+   - passwd - Stores account info for all valid users for the system.
+   - shadow - Contains encrypted passwds for users who are defined in the `passwd` file. The `passwd` file needs to be publicly readable, whereas the `shadow` file can be unreadable by all but the root user.
+   - prinitcap - Contains definitions for the printers configured for your computer. (if this file doesn't exist, look for printer info in `/etc/cups` dir)
+   - profile - Sets sys-wide env't and startup programs for all users. This file is read when the user logs in. 
+   - rpc - Defines remote procedure call names and numbers.
+   - services - Defines TCP/IP and UDP service names and their port assignments.
+   - shells - Lists the shell command-line interpeters (bash, sh, csh,...) that are available on the sys and their locations. 
+   - sudoers - Sets commands that can be run by users, who may not otherwise have permission to run the command, using `sudo` command. This file is used to provide selected users with root permission. 
+   - rsyslog.conf - Defines what logging msgs are gathered by the `syslogd`daemon and what files they are stored in. ( log msgs are stored in files contained in /var/log )
+   - termcap - List definitions for character terminals, so that character-based apps know what features are supported by a given terminal. 
+   - xinetd.conf - Contains simple config info used by `xinetd` daemon process. This file mostly points to the `/etc/xinetd.d` dir for info about individual services.
+   - x11 - Includes subdir(s) that each contain sys-wide config files used by X & different X window managers available for linux. The `xorg.conf` file(configures your computer and monitor to make it usable with X) and config dir(s) containing files used by `xdm` and `xinit` to start X are in here. Window managers that may have sys-wide config files in these dir(s) include twm (twm/) and xfce (xdg/) 
+
+
+  Administrative log files
+   The main utility for logging error and debugging messages for linux is `rsyslogd` daemon. (some older linux use `syslogd` and its daemons).
+   Logging is done according to information in the /etc/rsyslog.conf file. Messages are directed to log files that are usually in the /var/log dir. Here are few common log files:-
+	* boot.log - Contains boot msgs about services as they start up
+	* messages - Contains many general info msgs about the system.
+	* secure - Contains security-related msgs e.g login activity or any other act that authenticate users.
+	* XFree86.9.log or Xlog.0.log - Depending on which X server you're using, contains msgs about your video card, mouse & monitor config.
+
+
+  Using Other Administrative Accounts
+    It was a fairly common practice in UNIX systems to have several different administrative logins that allowed admin tasks to be split among several users. e.g people sitting near a printer colud have `lp` permissions to move print jobs to another printer if they knew a printer wasn't working. 
+   Administrative login are available with linux; however logging in directly as those users is disabled by default. The accounts are maintained primarily to provide ownership for files and processes associated with a given services. 
+   Consider the following example:-
+    * lp - user owns such things as the /var/log/cups printing log file and various printing cache and spool files. The home dir for lp is /var/spool/lpd
+    * ... and many others
+  By default the administrative logins are disabled. You would need to change the default shell from its current setting (usually /sbin/nologin or /bin/false) to a real shell (/bin/bash) to be able to log in as these users.
+
+
+  Checking and Configuring Hardware
+    The kernel include udev (to dynamically name and create devics as hardware comes and goes) and HAL (to pass info about hardware changes to user space).
+
+   Checking Hardware
+    When your system boots, the kernel detects your hardware and loads drivers that allow linux to work with that hardware. You can run `dmesg` command to see what hardware was detected and which drivers were loaded by the kernel at boot time. Or you can as well view contents in /var/log/dmesg file.
+     Once your system is running, many kernel messages are sent to /var/log/messages file. So, e.g if you want to see what happens when you plug in USB drive, you can type `tail -f /var/log/messages` and watch as devices and mount points are created
+
+   The following is an example of some output from `dmesg` command.   
+
+[    0.000000] microcode: microcode updated early to revision 0x26, date = 2019-11-12
+[    0.000000] Linux version 5.15.0-91-generic (buildd@lcy02-amd64-061) (gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0, GNU ld (GNU Binutils for Ubuntu) 2.34) #101~20.04.1-Ubuntu SMP Thu Nov 16 14:22:28 UTC 2023 (Ubuntu 5.15.0-91.101~20.04.1-generic 5.15.131)
+[    0.000000] Command line: BOOT_IMAGE=/boot/vmlinuz-5.15.0-91-generic root=UUID=87ff37f8-01b1-4d48-a8d8-7d046abeed3f ro quiet splash vt.handoff=7
+[    0.000000] KERNEL supported cpus:
+[    0.000000]   Intel GenuineIntel
+[    0.000000]   AMD AuthenticAMD
+   
+  The above output displays the linux kernel version, supported cpus arch(s),...
+  
+  To list PCI buses on you computer and devices connected to them, use
+   $ lspci
+  
+   The following is the output from `lspci` command
+
+00:00.0 Host bridge: Intel Corporation Haswell-ULT DRAM Controller (rev 0b)
+00:02.0 VGA compatible controller: Intel Corporation Haswell-ULT Integrated Graphics Controller (rev 0b)
+
+  The host bridge connects the local bus to other components on the PCI bridge. You can see the video display (VGA...) and etc. You can google the model name and number in case of any problem.
+
+  To list info about USB hubs along with any USB devices connected to the computer's USB ports:-
+    $ lsusb
+
+   The following is the output from `lsusb` command
+ 
+Bus 001 Device 002: ID 8087:8000 Intel Corp. 
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 003 Device 002: ID 0424:5534 Microchip Technology, Inc. (formerly SMSC) Hub
+  
+  To see details about your processors, run
+  $ lscpu
+
+Architecture:                       x86_64 # this is a 64-bit system
+CPU op-mode(s):                     32-bit, 64-bit
+Byte Order:                         Little Endian
+Address sizes:                      39 bits physical, 48 bits virtual
+
+  
+  Working with loadable modules
+    If you've added hardware to your computer that isn''t properly detected, you might need to manually load a module for that hardware. Linux comes with a set of commands for loading, unload or getting info about hardware modules.
+    Kernel modules are installed in `/lib/modules/` subdir(s). The name of each subdir is based on the release number of the kernel. E.g if the kernel were '3.10-7.fc', the ib/modules/3.10-7.fc dir would contain drivers for that kernel.
+
+    Listing loaded modules
+     To see which modules are currently loaded into the running kernel on your computer, use:
+      $ lsmod
+
+    The following is some of the output from `lsmod` command 
+
+Module                  Size  Used by
+uas                    28672  0
+usb_storage            77824  1 uas
+ipheth                 16384  0
+
+   To find info about any of the loaded modules, use
+     $ modinfo options module_name 
+	with options
+	   -a author
+	   -n object file representing the module.
+	   
+
+     Loading modules
+      You can load any module that has been compiled and installed (to a lib/modules subdir) into your running kernel using `modprobe` command. The reason for loading a module is:-
+	* To use a feature temporarily (e.g loading a module to support specail file system on a floppy you want to access).
+	* To identify that module as one that will be used by a given piece of hardware that could not be autodetected.
+
+ 	$ modprobe module_name # After installed it in /lib/modules subdir
+
+      Removing modules
+	To remove a module from a running kernel
+	  $ rmmod module_name 
+		OR
+	  $ modprobe -r module_name
+
+
+
+
+Installing Linux # chapter 9
+    Installing from a live CD or USB drive
+	Here you are just copying the kernel, apps and settings from USB to hard disk.
+    Understanding different parition types.
+     - Linux partitions - Use this option to create a partition for an ext[2,3,4] filesystem type that is added directly to a partition on your disk.
+     - LVM partitions - LVMs give you more flexibility in growing, shrinking and moving partitions later than regular partitions do.
+     - swap partitions - Create a swap partition to extend the amount of virtual memory available on your system.
+
+
+     Using the GRUB boot loader.
+	A boot loader lets you choose when and how to boot the OS installed on your computer's hard disks. 
+	GRand Unified Bootloader (GRUB) is the most popular bootloader used for installed linux sys. There are 2 major versions of GRUB:-
+	1. GRUB Legacy (version 1) - Used by Debian,Red-Hat
+	2. GRUB 2 - The current versions of Ubuntu and RedHat
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

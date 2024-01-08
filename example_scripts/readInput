@@ -1,0 +1,5 @@
+#!/bin/bash
+read -p "Do you want to install termux?(y/n): " answer ;
+echo "You chose $answer and $ and $0" ;
+
+exit 0;

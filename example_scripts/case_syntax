@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# This example demonstrates a case syntax in shell scripting.
+
+# Our VAR doesn't have to be a variable,
+# it can be the output of a command as well
+
+case `date +%a` in 
+  "Mon")
+     Backup=/home/path/to/backup
+     Tape=/dev/rft0
+# Note the use of double semi-column to end each option
+  ;;
+   "Tue" | "Thu")
+	Backup=/home/path/to
+	Tape=/dev/rft1
+
+	;;
+ # default 
+   *)
+     Backup="none"
+     Tape=/dev/null
+     ;;
+esac

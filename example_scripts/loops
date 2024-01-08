@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# This example demonstrates the use of loops.
+
+# for..do loop
+# The list-items are seperated with whitespace
+
+for NAME in isaac jane brian richy; do
+	echo $NAME ;
+done
+
+# OR using c-like syntax 
+# Don't put $ on the limit 
+
+LIMIT=5
+
+for ((i=0; i < LIMIT; i++)); do
+	echo $i;
+done
+
+
+# while...do
+
+echo "while...do.loop"
+N=0
+while [ $N -lt $LIMIT ] ; do
+  echo -n $N
+  let N=$N+1
+
+done
+
+
+# until...do
+
+echo -e "\nUntil...do loop"
+K=0;
+until [ $K -eq $LIMIT ]; do
+  echo -n $K
+  let K=$K+1
+done

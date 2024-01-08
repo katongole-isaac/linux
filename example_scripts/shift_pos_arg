@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Shifting positional args
+
+echo $*
+
+shift
+
+echo $1 $2 $3 

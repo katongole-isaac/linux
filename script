@@ -1,0 +1,17 @@
+#!/bin/bash
+
+MACHINE=`uname -m`;
+HOSTNAME=`uname -n`;
+PROCESSOR=$MACHINE;
+KERNEL=$(uname -v);
+OS=`uname --operating-system`;
+
+echo "------- System Info --------";
+echo "OS: $OS";
+echo "Machine: $MACHINE";
+echo "Hostname: $HOSTNAME";
+echo "CPU_Arch: $PROCESSOR";
+echo "Kernel: $KERNEL";
+echo "----------- END -------------";
+
+

@@ -1,0 +1,60 @@
+#/bin/bash
+#
+# A very simple telephone list
+#
+#
+
+PHONELIST=./.phonelist.txt
+
+# Check in file exist otherwise create it.
+
+if [ ! -f $PHONELIST ] ; then 
+  touch ".phonelist.txt";
+fi
+
+# if no command-line arg 
+# There is a problem, so ask what the user wants.
+if [ $# -lt 1 ] ; then
+  echo "I didn't understand what you want";
+  exit 1;
+fi
+
+# Add new phone number.
+if [ "$1" = "new" ] ; then
+  # shifting positional arg
+  shift
+  
+  # check if name and phone number are not empty  
+  if [ -n $1 ]  &&  [ -n $2 ] ; then
+    echo $* >> $PHONELIST;
+    echo "$* added to phonelist";
+    exit 0;
+  else 
+    echo "Please you must provide both the name and number";
+    exit 1
+  fi 
+fi
+
+# Search for name or number in the phonelise
+grep -i -q $* $PHONELIST 2> /dev/null
+if [ $? -ne 0 ] ; then
+  echo "No such user in phonelist";
+  exit 1;
+else
+  grep -i $* $PHONELIST 2> /dev/null
+fi
+
+exit 0;
+
+
+
+
+
+
+
+
+
+
+
+
+ 

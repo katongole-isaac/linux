@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# looping through a list.
+
+echo "for...do";
+for word in moose cow goose sow ; do
+  echo "I have a $word" ;
+
+done
+
+echo "Another loop";
+
+# array declaration
+ITEMS=('moose' 'cow' 'goose' 'sow');
+
+for ((i=0; i < ${#ITEMS[@]}; i++)); do
+  echo "I have a ${ITEMS[$i]} ";
+done
