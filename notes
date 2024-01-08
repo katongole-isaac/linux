@@ -579,6 +579,7 @@ With GRUB bootloader in the Master Boot Record of your hard disk, when the BIOS 
       The 3rd line (starts with `initd`) identifies the location of the initial RAM disk which contains additional modules and tools needed during the boot process.
 
     Here are some of the few options you can provide:-
+    NOTE: remove or add options after the name of the kernel boot image
      - Boot to a shell - If your forgot your root password or if your boot process hangs, you can boot directly to a shell by adding `init=/bin/sh` to the boot line.
      - Select a run level - You can add the run level you want to the end of the kernel line e.g to have the system boot to runlevel 3(multi-user plus networking) add 3 to the end of the kernel line.
      - Watch boot messages - By default, you will see a splash screen as Linux boots. If you want to see messages showing activities happening as the system boots up, you can remove the option `rhgb quiet` from the kernel line. Pressing `ESC` during boot-up get the same result 
