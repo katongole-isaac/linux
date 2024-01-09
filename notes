@@ -645,7 +645,7 @@ MANAGING USER ACCOUNTS # CHAPTER 11
 	- login name is the first.
 	- Password file contains `x` because, the shadow password file is used to store encrypted passwd data (/etc/shadow)
 	- User ID represented by 1001.
-	- Primary group ID represented by 1004 which corresponds to a private `rasta` group in the `/etc/group` file.
+	- Primary group ID represented by 1004 which corresponds to a private 'rasta' group in the `/etc/group` file.
 	- Comment field here is empty i.e 1004::/home...
 	- The home dir was auto..lly assigned to /home/rasta
 	- The default shell was set to bash as /bin/bash
@@ -658,7 +658,7 @@ MANAGING USER ACCOUNTS # CHAPTER 11
 	- Name of the group `developers`
 	- Group password `x` (Usually filled with `x`)
 	- Group ID associated with it `1005`
-	- List of users in that group `rasta`
+	- List of users in that group 'rasta'
 
      Setting user defaults.
 	The `useradd` command determines the default values for new accounts by reading the `/etc/login.defs` and `/etc/default/useradd` files. You can edit these files manually.
@@ -671,7 +671,73 @@ MANAGING USER ACCOUNTS # CHAPTER 11
 	$ useradd -D -s shell_path [options_here] 
 
     Modifying users with `usermod`
-     The `usermod` command provides a simple and straightforward method for changing account params. Many options available with it mirror those found in `useradd`.
+     The `usermod` command provides a simple and straightforward method for changing account params. Many options available with it mirror those found in `useradd`. Other options include:-	
+	- l login_name - Change the login name of the account
+	- L - Lock the account by putting an exclamation point at the beginning of the encrypted passwd in `/etc/shadow`. This locks the account, while still allowing you to leave the passwd intact (the -U option unlocks it).
+	- -m Move the content of the home dir to a new location (used with -d option)
+	- U - Unlocks the user account(by removing the exclamation mark at the start of the encrypted password) 
+
+	$ usermod -aG kernels,bad_boys,coders isaac # ensure to include -a
+
+    Deleting users with `userdel`
+     When removing a user ensure to pass `-r` option to remove the user's home dir as well otherwise it will not be removed.
+	# userdel -r isaac
+    Keep in mind that simply removing the user account does not change anything about the files that user leaves around the system(except those that are deleted when you use `-r`). However, ownership of the files left behind appears as belonging to the previous owner's user ID number when you run `ls -l` on the files.
+    Before you delete the user, you may want to run a `find` command to find all the files that would be left behind by the user. After you delete the user. Forexample
+
+	$ find / -user isaac -ls # find all files belonging to user 'isaac' and list them
+
+    Understanding Group Accounts
+      Group accounts are useful if you want to share a set of files with multiple users.
+    Using group accounts
+      Every user is assigned to a primary group. By default, that group is a new group with the same name as the user. Forexample
+
+	rasta:x:1001:1004::/home/rasta:/bin/bash
+	
+	The group ID is 1004 in `/etc/passwd`. That entry points to an entry in the `/etc/group` file
+
+	rasta:x:1004: 
+
+  Here are few facts about using groups
+     - When 'rasta' creates a file or dir, by default that file or dir is assigned to 'rasta' primary group.
+     - The user 'rasta' can belong to zero or more supplementary groups.
+     - The user 'rasta' can't add himself to a supplementary group. 
+     - Any file assigned to supplementary group will be accessible to 'rasta'If 'rasta' wants to create a file with one of these groups, He could use `newgrp` command to have a supplementary group become her primary group temporarily and creates a file. Forexample
+	$ newgrp others 
+	$ touch file{1,2} 
+
+   It is also possible to allow users to temporarily become a member of a group with the `newgrp` command without actually being a member of that group. To do that, it requires someone with root permissions, can use `gpasswd` command to set a group passwd (e.g `gpasswd group_name`). After that any user can type `newgrp group_name` into the shell and temporarily use that group as thier primary group by simply entering the password for the group.
+
+    Creating group accounts
+     Group ID numbers from 0 to 1000 are assigned to administrative groups. Regular groups begin from 1000 onwards. On the first UNIX systems, GIDs went from 0 to 99. To create a group use `groupadd` command. Here are some of the example.
+	# groupadd developers # GID is assigned auto..lly
+	# groupadd -g 400 maintainers # GID is assigned on creation
+	
+      To modify groups use `groupmod` command.
+	# groupmod -g 300 kernel_devs # GID changed to 300
+	# groupmod -n kernel kernel_devs # Changed group name to kernel
+
+
+   Managing Users in the Enterprise
+    Enhancements to user/group model allow regular users to set up special collaborative dir(s) (using features e.g sticky bit and set GID bit dir(s)). Using Access Control Lists (ACLs), any user can also assign specific permissions to files and dir(s) to any users and groups they like.
+
+      Setting permissions with Access Control Lists
+	Access Control List (ACL) feature was created so that regular users could share their files & dir(s) selectively with other users & groups. With ACLs, a use can allow other to (rwx) without leaving thos file system elements wide open or requiring the root user to change the user or group assigned to them.
+
+        Here are a few things to know about ACLs:-
+	 - For ACLs to be used, they must be enabled on the file system when that file system is mounted.
+	 - If you create a file system after installation (e.g as when you add a hard disk), you need to make sure that the `acl` mount option is used when file system is mounted.
+	 - To add ACLs to a file, you use `setfacl` command; to view ACLs set on a file, you can use `getfacl` command
+	 - To set ACLs on any file or dir(s), you must be the actual owner(user) assigned to it. In other words, being assigned user or group permissions with `setfacl` does not give you permission to change ACLs on those files yourself.
+	 - Because multiple users & groups can be assigned to a file/dir, the actual permission a user has is based on a union of all user/group designations to which they belong. E.g if a file had read-only permission (r--) for the 'sales' group and (rwx) for the 'market' group and 'isaac' belonged to both, 'isaac' would have 'rwx' permission 
+
+
+
+
+
+
+
+
 
 
 
