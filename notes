@@ -600,15 +600,78 @@ With GRUB bootloader in the Master Boot Record of your hard disk, when the BIOS 
 
 
 GETTING AND MANGING SOFTWARE # CHAPTER 10
+  A tarball is a single file in which mutliple files are gathered together for convenient storage or distribution. A tarball contains executable files(commands), docs, config files and libs. When you install software from a tarball, the files from that tarball might be spread across your linux sys in appropriate dir(s) e.g (/usr/share/man, /bin, /lib , ...)
+   Packages progressed from tarballs to more complex packaging.
+	* deb (.deb) packaging - Created by Debian GNU/Linux project 
+	* RPM (.rpm) packaging
+
+  For more info refer to `apt documentation`
 
 
+MANAGING USER ACCOUNTS # CHAPTER 11
+  Creating User Accounts 
+    To add a new user account, you simply use `useradd` command. The following options are available to provide additional info.
+	* -c "comment here" - Provide a description of a new user account. Typically the person's name. e.g -c isaac or -c "isaac dev"
+	* -d home_dir - Set the home dir to use for the account. The default is to name it the same as the login name and to place it in `/home`
+	* -D - Rather than create a new account, save the supplied info as the new default settings for any new accounts that are created.
+	* -e expire_date - Assign the expiration date for the account in `YYY-MM-DD` format. e.g -e 2024-02-01
+	* -f -1 - set the number of days after a password expires until the account is permanently disabled. The default, -1, disables the option, setting this to `0` disables the account immediately after password expiry. Replace `-` with the number to use.  
+	* -g group - Set the primary group (it must already exist in /etc/group file) the new user will be in.
+	* -G grouplist - Add the new user to the comma-seperated list of supplementary groups (e.g -G play,food). You can also use `usermod`.
+	* -k skel_dir - Set the skeleton dir containing the initial config files and login scripts that should be copied to a new user's home dir. This param can be used only in conjunction with the -m option. (defaults to /etc/skel)
+	* -m - Auto..lly create the user' home dir and copy the files in the skeleton dir(/etc/skel) to it.
+	* -M Do not create the new user's home dir even if the default behavior is set to create it.
+	* -o - Use with `-u uid` to create to user account that has the same UID as another username. (This effectively lets you have two different usernames with authority over the same set of files and dir(s))
+	* -p passwd - Enter a password for the account you are adding. This must be an encrypted password. (To generate encrypted MD5 password use `openssl passwd`). You can later use `passwd` command 
+	* -s shell - Specify the command shell to use for this account.
+	* -u user_id - Specify the user ID number for the account (e.g -u 100) 
+	Forexample
+	# useradd -c "Isaac developer" Isaac
+	# passwd isaac # setting passwd for user isaac
 
+   In creating the account for isaac, the `useradd` command performs several actions:-
+	- Read the `/etc/login.defs` and the `/etc/default/useradd` files to get default values to use when creating accounts. 
+	- Checks command-line params to find out which default values to override.
+	- Create a new user entry in the `/etc/passwd` and `/etc/shadow` files based on the default values and command-line params
+	- Creates any new group entries in the `/etc/group` file 
+	- Creates a home dir, based on the user's name in the `/home` dir.
+	- Copies any files located within the `/etc/skel` dir to the new home dir. This usually includes login and app startup scripts.
+	
+  Each line the `/etc/passwd` file represents a single user account record. Each field is seperated with colon(:) e.g 
 
+	rasta:x:1001:1004::/home/rasta:/bin/bash
 
+     The following explains the above record.	
+	- login name is the first.
+	- Password file contains `x` because, the shadow password file is used to store encrypted passwd data (/etc/shadow)
+	- User ID represented by 1001.
+	- Primary group ID represented by 1004 which corresponds to a private `rasta` group in the `/etc/group` file.
+	- Comment field here is empty i.e 1004::/home...
+	- The home dir was auto..lly assigned to /home/rasta
+	- The default shell was set to bash as /bin/bash
 
+   The `/etc/group` file holds info about the different groups on the system and the users who belong to them. Groups are useful for enabling multiple users to share access to the same file while denying access to others. Here is the `/etc/group` entry 
 
+	developers:x:1005:rasta
 
+     Each line in the group file contains:-
+	- Name of the group `developers`
+	- Group password `x` (Usually filled with `x`)
+	- Group ID associated with it `1005`
+	- List of users in that group `rasta`
 
+     Setting user defaults.
+	The `useradd` command determines the default values for new accounts by reading the `/etc/login.defs` and `/etc/default/useradd` files. You can edit these files manually.
+	To see the defaults set
+
+	$ useradd -D 	
+	 
+	You can also change the defaults e.g 
+
+	$ useradd -D -s shell_path [options_here] 
+
+    Modifying users with `usermod`
+     The `usermod` command provides a simple and straightforward method for changing account params. Many options available with it mirror those found in `useradd`.
 
 
 
