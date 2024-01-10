@@ -731,12 +731,110 @@ MANAGING USER ACCOUNTS # CHAPTER 11
 	 - To set ACLs on any file or dir(s), you must be the actual owner(user) assigned to it. In other words, being assigned user or group permissions with `setfacl` does not give you permission to change ACLs on those files yourself.
 	 - Because multiple users & groups can be assigned to a file/dir, the actual permission a user has is based on a union of all user/group designations to which they belong. E.g if a file had read-only permission (r--) for the 'sales' group and (rwx) for the 'market' group and 'isaac' belonged to both, 'isaac' would have 'rwx' permission 
 
+    Setting ACLs with `setfacl`
+     You can modify (-m) or remove (-x) ACL permissions. The syntax:-
 
+	setfacl -m [u|g]:[username|group]:rwx [file|dir]
 
+	* -m - Indicates the modify option
+	*  u - Setting ACL permission for user.
+	*  g - Setting ACL for group
+	* [username|group] - Depends on [u|g] option
+	* rwx - Indicates the permissions you want to assign to file or dir
+	* [file|dir] - Files or dir(s).
 
+	setfacl -m u:rasta:rw notes
 
+      Look at `ls -l` and `getfacl` output
 
+	-rw-rw-r--+ 1 isaac isaac 0 Jan 10 10:24 notes
 
+       The (+) sign indicates that ACLs are set on the file, so you can run `getfacl` command to see how they are set.
+
+         The output for `getfacl` 
+
+		# file: ip
+		# owner: isaac
+		# group: isaac
+		user::rw-
+		user:rasta:rw-
+		group::rw-
+		mask::rw-
+		other::r--
+
+     The output shows `isaac` as owner & group (same as ls -l), the regular user permissions (rw-) and permission for ACL user 'rasta' (rw-). The same is true for group permissions.
+      The mask line, as soon as you set the ACL on a file, the regular group permission on the file sets a mask of the maximum permission an ACL user or group can have on a file. So, even if you provide an individual with more ACL permissions than the group permissions will allow, the individual's effective permissions will not exceed the group permissions. E.g 
+
+	$ chmod 644 ~/ip
+
+	# file: ip
+	# owner: isaac
+	# group: rasta
+	user::rw-
+	user:rasta:rw-			#effective:r--
+	group::rw-			#effective:r--
+	group:rasta:rw-			#effective:r--
+	mask::r--
+	other::r-
+
+     Even though the user 'rasta' and group have (rw-) permissions, their effective permissions are (r--), so they are not able to change the file unless the owner open permissions again (e.g `chmod 664 ip`)
+
+   Setting default ACLs
+    Setting default ACLs on a dir enables your ACLs to be inherited. That means that when new files or dir(s) are created in that dir, they are assigned the same ACLs. To set the ACL permission as the default, you add `d:` to the user or group designation. Forexample
+
+	$ setfacl -m  d:[u|g]:[username|group]:rwx [file|dir]
+
+	$ setfacl -m  d:u:rasta:rwx my_dir # files and dir(s) inside the 'my_dir' dir inherit the set ACL. Because a regular file is created without execute permission, the effective permission is reduced to (rw-)  
+
+	$ setfacl -m d:u:rasta:rwx ip-addr
+
+	# file: ip-addr
+	# owner: isaac
+	# group: isaac
+	user::rwx
+	group::rwx
+	other::r-x
+	default:user::rwx
+	default:user:rasta:rwx
+	default:group::rwx
+	default:mask::rwx
+	default:other::r-x
+
+   Enabling ACLs 
+     Basic Linux file systems have only one user and one group assigned to each file and dir and do not include ACL support by default. Linux 'ext' file system types (ext2, ext3, and ext4) can add ACL support through a mount option. To add ACL support, you must add the `acl` mount optiom when you mount it. This can be done by:-
+	- Add the 'acl' option to the 5th field in the line in the `/etc/fstab` file that autom..lly mounts the file system when the system boots up.
+	- Implant the 'acl' line in the default mount options field in the file system's superblock so that the 'acl' option is used whether the file system is mounted auto..lly or manually.
+	- Add the 'acl' option to the `mount` command-line when you mount the file system manually with the `mount` command.
+
+   To check that the `acl` option has been added to a file system, determine the device name associated with the file system, then run `tune2fs -l` command to view the implanted mount options. 
+
+	# mount  # to see a list of file system that are currently mounted
+	# sudo tune2fs -l UUID=87ff37f8-01b1-4d48-a8d8-7d046abeed3f | grep -i "mount options"
+	Default mount options:    user_xattr acl
+
+       	- user_xattr option - means extended attributes e.g SELinux
+	- acl - ACL 
+	These options were implanted in the file system super block so they would be used when the file system was mounted.
+    If the Default mount options field is blank (such as when you have just created a new file system), you can add the `acl` mount option using the `tune2fs -o` command. Forexample
+      I created a file system on a USB drive that was assigned as the /dev/sdb1 device. To implant the acl mount option add check that it is there
+
+	# tune2fs -o acl /dev/sdb1
+	# tune2fs -l /dev/sdb1 
+
+   A second way to add `acl` support to a file system is to add the `acl` option to the line in the `/etc/fstab` file that auto..lly mounts the file system at boot time.
+
+	/dev/sdb1	/var/tmp	ext4 	acl 	1 2
+
+   Instead of the defaults entry in the 4th field, I added `acl`. If there were already options set in that field, add a comma after the last option and add 'acl'. The next time the file system is mounted, ACLs are enbaled. If the file system were already mounted, I could type the following to remount the file system, using `acl` or any other values added to the /etc/fstab file.
+
+	# mount -o remount /dev/sdb1
+
+   A third way you can add ACL support to the file system is to mount the file system by hand and specifically request the `acl` mount option. So, if there were no entry for the file system in the `/etc/fstab` file, after creating the mount point, type the following to mount fs and include ACL support:- 
+
+	# mount -o acl device mount_point
+	# mount -o acl /dev/sdb1 /var/tmp 
+
+  Keep in mind that the `mount` command only mounts the file system temporarily. When the system reboots, the file system will not be mounted again, unless you add an entry in the `/etc/fstab` file
 
 
 
