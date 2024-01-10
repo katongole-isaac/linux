@@ -836,13 +836,33 @@ MANAGING USER ACCOUNTS # CHAPTER 11
 
   Keep in mind that the `mount` command only mounts the file system temporarily. When the system reboots, the file system will not be mounted again, unless you add an entry in the `/etc/fstab` file
 
+     Adding dir(s) for users to collaborate
+      These is a special set of three permission bits that are typically ignored when you use the `chmod` command to change permissions on the file system. These bits can set special permissions on commands and dir(s). These can help you create dir(s) to use for collaboration.
+      When you run:-
 
+	$ chmod 775 /mnt/xyz # implied permission is actually 0775
 
+	To change the permissions, you can replace the number 0 with any combination of those three bits (4,2,1) or use letters
 
+	Name 		Numeric_Value	Letter_Value
+	set user ID bit		4 	    u+s
+	set group ID bit	2 	    g+s
+	Sticky bit		1 	    o+t
 
+    Creating group collaboration dir(s) (set GID bit)
+      By creating a set GID dir, any files created in that dir are assigned to the group assigned to the dir itself. The idea is to have a dir where all group members can share files but still protect them from other users. Forexample:-
 
+	# groupadd -g 400 developers # adding developers group
+	# usermod -aG developers rasta # adding rasta to the group 
+	# mkdir /mnt/shared
+	# chgrp developers /mnt/shared # changing dir's group to developers
+	# chmod 2775 /mnt/shared # This turns on the set GID bit (2) 
 
+	When you list permissions, you can see that the dir is a set GID dir because of the lowercase 's' appears where the group execute permission should be (rwxrwsr-x)
 
+	drwxrwsr-x 
+
+      Any files created by any users in the group `developers` will belong to the developers group, so members in this group can read or write to that file
 
 
 
