@@ -722,7 +722,7 @@ MANAGING USER ACCOUNTS # CHAPTER 11
     Enhancements to user/group model allow regular users to set up special collaborative dir(s) (using features e.g sticky bit and set GID bit dir(s)). Using Access Control Lists (ACLs), any user can also assign specific permissions to files and dir(s) to any users and groups they like.
 
       Setting permissions with Access Control Lists
-	Access Control List (ACL) feature was created so that regular users could share their files & dir(s) selectively with other users & groups. With ACLs, a use can allow other to (rwx) without leaving thos file system elements wide open or requiring the root user to change the user or group assigned to them.
+	Access Control List (ACL) feature was created so that regular users could share their files & dir(s) selectively with other users & groups. With ACLs, a use can allow other to (rwx) without leaving those file system elements wide open or requiring the root user to change the user or group assigned to them.
 
         Here are a few things to know about ACLs:-
 	 - For ACLs to be used, they must be enabled on the file system when that file system is mounted.
@@ -863,6 +863,40 @@ MANAGING USER ACCOUNTS # CHAPTER 11
 	drwxrwsr-x 
 
       Any files created by any users in the group `developers` will belong to the developers group, so members in this group can read or write to that file
+
+    Using Set UID and Set GID bit commands
+     The set UID and Set GID bits are used on special executable files that allow commands set to be run differently from most. Normally, when a user runs a command, that command runs with that user's permissions. In other words, if i run `vi` command as 'isaac', that instance of the `vi` command would have the permissions to read & write files that the user 'isaac' could read & write. 
+     Commands with the set UID or set GID bits set are different. It is the owner and group assigned to the command that determines the permissions the command has to access resources on the computer. So a set UID command by root would run with root permissions; a set GID command owned by apache would have apache group permissions.
+     Examples of applications that have set UID bits turned on are the `su` and `newgrp` commands. The commands must be able to act as the root user to do their jobs. However, to actually get root permissions, a user must provide a password.
+     You can tell `su` is a set UID bit command because of the `s` where the first execute bit (x) usually goes:
+
+	-rwsr-xr-x 1 root root 44784 Nov 29  2022 /usr/bin/newgrp
+
+      Creating restricted deletion dir(s) (sticky bit)
+        A restricted deletion dir is created by turning on a dir's sticky bit. Normally, if write permission is open to a user on a file or dir, that user is able to delete that file or dir. However, in a restricted deletion dir, unless you are the root or the owner of the dir, you can never delete another user's files.       
+	Typically, a restricted deletion dir is used as a place where lots of different users can create files. For example, the /tmp dir is a restricted deletion dir.
+
+	drwxrwxrwt 54 root root 20480 Jan 12 13:05 /tmp/
+
+	You can see the permissions are wide open, but instead of an `x` for the execute bit for 'other' the `t` indicates that the sticky bit is set.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
