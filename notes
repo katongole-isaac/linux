@@ -881,8 +881,18 @@ MANAGING USER ACCOUNTS # CHAPTER 11
 	You can see the permissions are wide open, but instead of an `x` for the execute bit for 'other' the `t` indicates that the sticky bit is set.
 
 
+MANAGING DISKS AND FILESYSTEMS # CHAPTER 12
+  Hard disk provides storage for your OS, apps, and data. To organize the info on that disk, the disk is usually divided into partitions, with most partitions given a structure referred to as a filesystem 
 
-
+  Understanding Disk Storage
+   The basics of how data storage works are the same in most modern Operating systems. When you install the OS, the disk is divided into one or more partitions.
+ Each partition is formatted with a filesystem. In the case of Linux, some of the partitions may be specially formatted for elements such as swap area or LVM physical volumes.
+   Disks are used for permanent storage, random access Memory(RAM) and swap are used for temporary storage. For example when you run a command, that command is  copied (binary form) from the hard disk into RAM so that your computer processor (CPU) can access it more quickly.
+    CPU can access data much faster from RAM than it can from hard disk. However, a disk is usually much larger than RAM, RAM is much more expensive.
+   If RAM fills up, by running too many processes or a process with a memory leak, new processes will fail if your system does't have a way to extend system memory. That's where a swap area comes in.
+    A swap space is a hard disk partition where your computer can "swap out" data from RAM that isn't being used at the moment and then "swap in" the data back to RAM when it is again needed. Although it is better to never exceed your RAM(performance takes a hit when you swap), swapping out is better than having processes just fail
+    Another special partition is a logical volume manager (LVM) physical volume.
+    LVM physical volumes enable you to create pools of storage space called volume groups. From those volume groups, you have a lot more flexibility for growing and shrinking logical volumes than you have resizing disk partitions directly.
 
 
 
