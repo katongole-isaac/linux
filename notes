@@ -887,23 +887,149 @@ MANAGING DISKS AND FILESYSTEMS # CHAPTER 12
   Understanding Disk Storage
    The basics of how data storage works are the same in most modern Operating systems. When you install the OS, the disk is divided into one or more partitions.
  Each partition is formatted with a filesystem. In the case of Linux, some of the partitions may be specially formatted for elements such as swap area or LVM physical volumes.
-   Disks are used for permanent storage, random access Memory(RAM) and swap are used for temporary storage. For example when you run a command, that command is  copied (binary form) from the hard disk into RAM so that your computer processor (CPU) can access it more quickly.
+   Disks are used for permanent storage, random access Memory(RAM) and swap area used for temporary storage. For example when you run a command, that command is  copied (binary form) from the hard disk into RAM so that your computer processor (CPU) can access it more quickly.
     CPU can access data much faster from RAM than it can from hard disk. However, a disk is usually much larger than RAM, RAM is much more expensive.
    If RAM fills up, by running too many processes or a process with a memory leak, new processes will fail if your system does't have a way to extend system memory. That's where a swap area comes in.
     A swap space is a hard disk partition where your computer can "swap out" data from RAM that isn't being used at the moment and then "swap in" the data back to RAM when it is again needed. Although it is better to never exceed your RAM(performance takes a hit when you swap), swapping out is better than having processes just fail
     Another special partition is a logical volume manager (LVM) physical volume.
     LVM physical volumes enable you to create pools of storage space called volume groups. From those volume groups, you have a lot more flexibility for growing and shrinking logical volumes than you have resizing disk partitions directly.
+    For Linux, at least one disk partition is required, assigned to the root(/) of the entire filesystem. However, it's more common to have separate partitions that are assigned to given dir(s) such as '/home', '/var', '/tmp'. Each of the partitions is connected to the larger filesystem by mounting it to a point in the filesystem where you want that partition to be used. Any file added to the mount point dir of a partition or a subdir is stored on that partition.
 
+   NOTE: The word 'mount' refers to the action of connecting a filesystem from a hard disk, USB drive or network storage device to a particular point in the filesystem
 
+    Connecting disk partitions to the Linux filesystem is done auto..lly and invisibly to the end user. Each regular disk partition created when you install Linux is associated with a device name. An entry in the `/etc/fstab` file tells Linux each partition's device name and where to mount it. The mounting is done when the system boots.
 
+   Linux can understand VFAT filesystems, which are often the default format when you buy a USB flash drive. A VFAT USB flash drive provides a good way to share data between linux and Windows. Linux kernel support is available for NTFS filesystems, which are used in windows
 
+ Partitioning Hard Disks
+   You need to know how to partition your disk if you want to add a disk to your system or change your existing disk configuration. 
 
+   Viewing disk partitions
+    Use `fdisk` command with option:- 
+	* -l - list partition details
+	* -c - turn off DOS compatibility mode
+	* -u - show size in sectors not cylinders
 
+	# fdisk -c -u -l /dev/sdb[a|b|c..]
+	
+	Disk /dev/sdb1: 58.61 GiB, 62912421888 bytes, 122875824 sectors
+	Units: sectors of 1 * 512 = 512 bytes
+	Sector size (logical/physical): 512 bytes / 512 bytes
+	I/O size (minimum/optimal): 512 bytes / 512 bytes
+	Disklabel type: dos
+	Disk identifier: 0x6e697373
 
+	Device      Boot      Start        End    Sectors   Size Id Type
+	/dev/sdb1p1      1936269394 3772285809 1836016416 875.5G 4f QNX4.x 3rd part
+	/dev/sdb1p2      1917848077 2462285169  544437093 259.6G 73 unknown
+	/dev/sdb1p3      1818575915 2362751050  544175136 259.5G 2b unknown
+	/dev/sdb1p4      2844524554 2844579527      54974  26.9M 61 SpeedStor
 
+    When this USB flash drive is inserted, it is assigned to the next available `sd` device. In this example, '/dev/sdb' is assigned as the device name.(the 2nd disk on the system).
+    
+  Here are some things to look for:- 
+   - A SCSI or USB storage device, represented by an 'sd' device (e.g sda, sdb, sdc, ...) can have upto 16 minor devices(for example the main /dev/sdb device and /dev/sdb1 through /dev/sdb15). So there can be 15 partitions total.
+   - For 32-bit(x86) computers, disk can have upto 4 primary partitions. So to have more than 4 total partitions, at least one must be an extended partition. An extend partition consumes all the remaining disk space not used by the first partitions. Any partitions after that are logical partitions that use space from the extended partition.
+   - The 'id' field indicates the type of partition. Notice that there is a mixture of Linux, FAT, swap and Linux LVM partitions.
 
+   Your primary hard disk usually appears as /dev/sda. 
 
+	# fdisk -c -u -l /dev/sda
 
+	Disk /dev/sda: 465.78 GiB, 500107862016 bytes, 976773168 sectors
+	Disk model: ST500VT000-1DK14
+	Units: sectors of 1 * 512 = 512 bytes
+	Sector size (logical/physical): 512 bytes / 4096 bytes
+	I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+	Disklabel type: dos
+	Disk identifier: 0x602e6949
+
+	Device     Boot   Start       End   Sectors   Size Id Type
+	/dev/sda1  *       2048   1050623   1048576   512M  b W95 FAT32
+	/dev/sda2       1052670 976771071 975718402 465.3G  5 Extended
+	/dev/sda5       1052672 976771071 975718400 465.3G 83 Linux
+
+	The first partition is 512MB and is mounted on the /boot dir. The (*) under the boot column indicates that the partition is bootable(that's where the kernel and other components needed to boot the system are stored). The rest of the disk is consumed by the LVM partition, which is ultimately used to create logical volumes.
+
+     Creating a single-partition disk
+      
+      Here is the general procedure:-
+	* Install the new hard drive or insert the new USB flash drive.
+	* Partition the new disk.
+	* Create the filesystems on the new disk
+	* Mount the filesystems
+
+   The easiest way to add a disk or flash drive to Linux is to have the entire disk devoted to a single Linux partition. You can have multiple partitions, however, and assign them each to different types of filesystems and different mount points, if you like
+
+    The following process takes you through partitioning a USB flash drive to be used for Linx thas has only one partition.
+    1. Determine the device name for the hard disk(USB flash drive)
+	
+	# dmesg -w # real-time messages as USB is being inserted 
+
+	[205125.496624] sd 2:0:0:0: [sdb] 122880000 512-byte logical blocks: (62.9 GB/58.6 GiB)
+	[205125.497331] sd 2:0:0:0: [sdb] Write Protect is off
+	[205125.497333] sd 2:0:0:0: [sdb] Mode Sense: 23 00 00 00
+	[205125.498048] sd 2:0:0:0: [sdb] No Caching mode page found
+	[205125.498053] sd 2:0:0:0: [sdb] Assuming drive cache: write through
+	[205125.502796]  sdb: sdb1 sdb2
+	[205125.508959] sd 2:0:0:0: [sdb] Attached SCSI removable disk
+
+    From the output, you can see that the USB flash drive was found and assigned to `/dev/sdb`. It contains two partitions (sdb1, sdb2).  
+
+    2. If the USB flash drive mounts auto..lly, unmount it. you can use desktop or command-line
+	
+	# unmount /dev/sdb1
+
+    3. Use the `fdisk` command to create partitions on the new disk. For example iff you're formatting the second USB,SATA or SCSI disk(sdb):-
+
+	# fdisk -c -u /dev/sdb
+
+	Adding the -c -u options enables you to select the size of each partition based on sectors instead of cylinders.
+
+    4. If you start with a new USB flash drive, it may have one partition that is entirely devoted to a windows-compatible filesystem (e.g VFAT). use:-
+	* p - to view all partitions
+	* d - to delete the partition
+
+    5. To create a new partition, type letter `n`. You're prompted for the type of partition.
+
+     6. Choose an extended (e) or primary partition (p). Type letter `p` to choose primary.
+
+      7. Type in the partition number. If you're creating the first partition(or for only one partition), type the number 1. You are prompted for the first sector to start the partition. 
+
+      8. Select the first available sector number (you can just press enter to choose it). You are prompted for the last sector. 
+
+      9. Enter the size of the partition. Because you are just creating one partition to consume the whole disk, choose the last available sector. To do that you can just press Enter to accept the default.
+
+     10. Double-check that the drive is partitioned the way you want by pressing `p` 
+	Device     Boot Start       End   Sectors  Size Id Type
+	/dev/sdb1        2048 122879999 122877952 58.6G 83 Linux
+
+     11. To make changes to the partition table permanent, type `w`. This will write the changes, try to sync those changes with the Linux kernel, and quit `fdisk`. If you see a message like the following, don't worry; you can fix that in the next step 
+	WARNING: Re-reading the partition table failed with error 16: Device or resource busy
+
+     12. If `fdisk` cannot sync the partition table on the disk with the kernel, the most likely reason is that a partition from the disk is still mounted. Unmount the partition and then try running the following command to sync the disk partition table with the kernel. 
+
+	# partprobe /dev/sdb
+
+	If `partprobe` does not work, rebooting the computer will make sure the disk and kernel are in sync.
+
+      13. Although the partitioning is done, the new partition is not yet ready to use. For that, you have to create a filesystem on the new partition. To create a filesystem on the new disk partition, use `mkfs` command. By default, this command creates `ext2` filesystem, which is usable by linux. However, in most cases you will want to use a journaling filesystem(e.g ext3,ext4). To create an `ext4` filesystem on the first partition of the second hard disk, type:- 
+
+	# mkfs -t ext4 /dev/sdb1
+
+       14. To be able to use the new filesystem, you need to create a mount point and mount it to the partition. Forexample:-
+
+	# mkdir /mnt/test
+	# mount /dev/sdb1 /mnt/test
+	# df -h /mnt/test # checking available disk space on this mount point
+	OR
+	# mount | grep sdb1 # search for sdb1 in the all mounted filesystems
+
+	Any files or dir(s) you create later in the `/mnt/test` dir and any of its subdir(s) will be stored on the `/dev/sdb1` device
+
+       15. When you're done using the drive, you can unmount it with `umount` command, after which you can safely remove the drive 
+
+	# umount /dev/sdb1
 
 
 
