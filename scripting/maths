@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# This file consists of example
+# on how to carry out math operation
+# in script
+
+# use `expr` command
+## syntax
+## expr 1 + 1
+#
+
+answer= expr 1 + 1
+
+echo $answer;
+
+# For multiplication you have to
+# escape asterisk (*) e.g \*
+
+answer= expr 10 \* 2
+
+echo $answer

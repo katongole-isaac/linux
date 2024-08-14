@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# This file illustrates the use of
+# exit codes in bash.
+# You can create custom exit codes
+# for you script
+
+# Reading exit code for the last command execution
+# use $?
+echo "it works" 
+echo "The exit code for the above command is $?";
+
+# Be careful while checking for exit codes
+# Sometimes it's better to throw custom exit codes
+
+dir=~\.
+
+if [ -d $dir ]; then
+ echo "Dir: $dir exists";
+else
+ echo $?
+ echo "Not nah deh yah"
+fi 
+
+# This is a poor approach of checking exit code.
+# But u can correct it by throwing custom exit codes.
+echo "The exit for the above is: $?";
+
+
+# Custom exit code
+# This is a re-write of the above 
+# check for exit code in certain scenario
+# dir=~\-
+
+# if [ -d $dir ]; then
+#  echo "Exists"
+#  exit 0;  # exit with success
+# else 
+#  echo "Not found"
+#  exit 1 # exit with a failure
+# fi
+
+# This code will never run
+# because we're telling the script to exit 
+echo "The exit code for the last command is: $?";
+
+command=ls-
+command -v $command >> /dev/null # No output
+
+if [ $? -eq 0 ]; then 
+ echo "The $command exists";
+else
+ echo "$command not exists";
+fi

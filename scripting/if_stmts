@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# This file illustrates how to write
+# if statements in bash scripting
+
+# Note: use `help test` for more
+# information on test flags
+
+# check if variable equals 10
+var=10
+
+if [ $var -eq 10 ]; then
+  echo "Yes variable is 10"
+fi
+
+# if and else
+if [ $var -ne 10 ]; then
+  echo "Variable is not 10"
+else
+  echo "Variable is 10"
+fi
+
+# checking greaterthan or lessthan
+if [ $var -gt 5 ] && [ $var -lt 20 ] ; then
+  echo "Variable is greaterthan 5 and lessthan 20";
+else
+  echo "False case"
+fi 
+
+# Checking for the presence of files 
+filename=maths.
+
+if [ -f $filename ]; then 
+  echo "File: $filename exists";
+else 
+  echo -ne "\x1b[31mIt seems that the file doesn't exists \x1b[0m\n";
+fi
+
+
+# checking for directories
+directory=~
+
+if [ -d $directory ]; then
+ echo "Dir: $directory exists";
+else
+ echo "Dir not found"
+fi
+
+
+# AND (&&) and OR (||)
+filename=maths
+dir=~
+
+if [ -f $filename ] || [ -d $dir ]; then
+ echo "Yes, good to go"
+else
+ echo "Something went wrong !!"
+fi
+
+
+# You can ignore the bracket []
+# for-example 
+# Test whether the command exists
+
+program=more-
+
+if command -v $program; then 
+ echo "Program: $program exists"
+else
+ echo "You can install $program if you want ..."
+ # You need to avoid cli prompts when dealing
+ # with script
+ # For-example when installing you can pass yes flag -y
+ # sudo apt install -y program
+fi 
+

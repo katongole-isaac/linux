@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# This file illustrates the use of
+# while loop
+
+# while loop can be used to do tasks
+# of the `if statements`
+# For-example
+
+# Checking the presence of the file
+# When the file is missing, you can
+# notify someone that the file nolonger exists.
+
+filename=testfile
+
+while [ -f $filename ]; do
+  echo "$(date) The file exists";
+  sleep 5 
+done
+
+echo "$(date) The file nolonger exists";
+
+
+exit # don't execute the code below
+
+# Simple loop 
+num=1
+
+while [ $num -lt 10 ]; do
+ echo "Num: $num";
+ num=$(( $num + 1 ))
+ sleep 0.5 # it works like setTimeout, wait for (t) seconds before proceeding
+done 
+

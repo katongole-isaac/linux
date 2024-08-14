@@ -1,0 +1,28 @@
+#!/bin/bash 
+
+# This file contains of examples on 
+# how to declare and use variables 
+# in bash
+
+# Declare and initialize variable
+# Note: There is no space between 
+# variable_name and it's value
+#
+# E.g variable=value
+#
+#
+myVar="This is a variable"
+
+echo $myVar;
+
+currency=200;
+
+echo "I have ($)$currency dollars";
+
+# Note a difference between the use of
+# single quote (') and double quote (")
+
+# For single quote there is no variable
+# substitution but there's when using
+# double quotes("")
+echo 'No variable substitution in this string $currency';
