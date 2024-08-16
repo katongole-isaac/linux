@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# This file consists of example of
+# a for loop in bash. 
+
+# How to declare a list
+# This list consists of numbers from 
+# 1 up to 10 inclusive
+list=(1 2 3 4 5 6 7 8 9 10);
+
+# NOTE: ${} - means parameter expansion: Accessing the 
+# values of a given variable
+# Forexample ${list[0]} - means the first list element
+
+# To get all elements
+# use: ${list[@]}
+
+echo "${list[@]}"
+
+# Access value in a given index
+echo "${list[1]}"; 
+
+# Add an element in the list
+list+=(11);
+
+echo "${list[@]}";
+
+dir=../example_scripts/exercises/*;
+
+# list files in the directory
+for file in $dir; do
+    # be very careful while
+    # performing the rm operation
+    # it's merely impossible to undo remove operation.
+done
+
+
+

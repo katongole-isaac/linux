@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# A very simple shell script 
-# Display current time, current dir and hostname.
-
-echo "Today is `date  +'%a %b %d %H:%M:%S %Z %Y'`";
-echo "you are in $PWD and your host is `uname -n`" ;
